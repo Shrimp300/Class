@@ -18,6 +18,10 @@ create_scaler = StandardScaler()
 
 seed = 520
 np.set_printoptions(precision=3)
+
+'''Alter the hidden_layer_sizes=(x,x,x,x,...) data below for number of hidden layers and nodes of each. i.e. (10,60,60,60,60,) this equals 10 inputs with 4 layers of 60 nodes each).
+max_iter is the total number of iterations to run as default is only 200. tol is how far past decimal to take values and n_iter_no_change is the number of times the values match
+before it calls the value good''' 
 model = MLPClassifier(max_iter = 1500, hidden_layer_sizes=(10,60,60,60,60,), random_state=seed, tol=1e-2, n_iter_no_change = 5)
 
 #Load data
