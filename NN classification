@@ -1,7 +1,6 @@
-from __future__ import print_function
-
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from sklearn.neural_network import MLPClassifier
 from sklearn import metrics
@@ -10,40 +9,21 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import Binarizer
 
-class DummyScaler:
-    
-    def fit(self, data):
-        pass
-    
-    def transform(self, data):
-        return data
 
-def create_scaler_dummy():
-    return DummyScaler()
-    
-def create_scaler_standard():
-    return StandardScaler()
-
-def create_scaler_minmax():
-    return MinMaxScaler()
-
-def crete_scaler_binarizer():
-    return Binarizer()
-
-# You can choose a scaler (just one should be uncommented):
-# create_scaler = create_scaler_dummy
-create_scaler = create_scaler_standard
-# create_scaler = create_scaler_minmax
-# create_scaler = create_scaler_binarizer
+'''Pick 1'''
+create_scaler = StandardScaler()
+# create_scaler = MinMaxScaler()
+# create_scaler = Binarizer()
 
 
 seed = 520
 np.set_printoptions(precision=3)
-model = MLPClassifier(hidden_layer_sizes=(10,10,10), random_state=seed)
+model = MLPClassifier(max_iter = 1500, hidden_layer_sizes=(10,60,60,60,60,), random_state=seed, tol=1e-2, n_iter_no_change = 5)
 
-print('Load the data')
+#Load data
 myfile = r"\Users\Norris\Onedrive\IEE520\project 1\Avila.csv"
 data = pd.read_csv(myfile)
+print('Data Details')
 print(data.describe())
 
 from sklearn import preprocessing
@@ -51,13 +31,10 @@ le = preprocessing.LabelEncoder()
 data_transform = data.apply(le.fit_transform)
 
 
-# Need to convert as yhat returned by the code is numpy
-# Otherwise, we input one Dataframe and one numpy array to the confusion matrix
-# and this will cause calculation error
 data_transform = data_transform.to_numpy()
 
-X = data_transform[:, 0:10]
-y = data_transform[:, 10]
+X = data_transform[:, 0:-1]
+y = data_transform[:, -1]
 
 # Count of each target values in the dataset
 tgt_values, unique_counts = np.unique(y,return_counts=True)
@@ -72,7 +49,7 @@ print(y)
 
 
 print('Train the model and predict')
-scaler = create_scaler()
+scaler = create_scaler
 model.fit(X, y)
 y_hat = model.predict(X)
 
@@ -101,10 +78,6 @@ kfold = model_selection.KFold(n_splits=5, shuffle=True, random_state=seed)
 
 # Cross-validation
 for train, test in kfold.split(X, y):
-    # Train classifier on training data, predict test data
-    
-    # Scaling train and test data
-    # Train scaler on training set only
     scaler.fit(X[train])
     X_train = scaler.transform(X[train])
     X_test = scaler.transform(X[test])
@@ -127,24 +100,17 @@ confusion_matrix = pd.crosstab(df['y_Actual'], df['y_Predicted'], rownames=['Act
 print (confusion_matrix)
 
 
-# cm.print_stats()
-# ax = cm.plot(backend='seaborn', annot=True, fmt='g')
-# ax.set_title('Confusion Matrix (CV)')
-# plt.show()
-
-
-# print('ROC curve')
-
+print('ROC curve')
 # ROC curve code here is for 2 classes only
-# if len(np.unique(y)) == 2: 
-#     fpr, tpr, threshold = metrics.roc_curve(y, y_prob)
-#     roc_auc = metrics.auc(fpr, tpr)
-#     plt.title('Receiver Operating Characteristic')
-#     plt.plot(fpr, tpr, 'b', label='AUC = %0.2f' % roc_auc)
-#     plt.legend(loc='lower right')
-#     plt.plot([0, 1], [0, 1], 'r--')
-#     plt.xlim([-0.01, 1.01])
-#     plt.ylim([-0.01, 1.01])
-#     plt.ylabel('True Positive Rate')
-#     plt.xlabel('False Positive Rate')
-#     plt.show()
+if len(np.unique(y)) == 10: 
+     fpr, tpr, threshold = metrics.roc_curve(y, y_prob)
+     roc_auc = metrics.auc(fpr, tpr)
+     plt.title('Receiver Operating Characteristic')
+     plt.plot(fpr, tpr, 'b', label='AUC = %0.2f' % roc_auc)
+     plt.legend(loc='lower right')
+     plt.plot([0, 1], [0, 1], 'r--')
+     plt.xlim([-0.01, 1.01])
+     plt.ylim([-0.01, 1.01])
+     plt.ylabel('True Positive Rate')
+     plt.xlabel('False Positive Rate')
+     plt.show()
